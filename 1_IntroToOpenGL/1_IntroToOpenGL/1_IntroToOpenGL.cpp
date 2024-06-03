@@ -107,12 +107,12 @@ int main()
         // -----------------
 
         // RENDER STUFF
-        
+
         // Reinitialize frame buffer
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         // -------------------------
-        
+
         // enable shader and update uniform variables
         myFirstShader.use();
         myFirstShader.setVec3("displacement", displacement_X, displacement_Y, displacement_Z);
@@ -164,7 +164,7 @@ void processInput(GLFWwindow* window)
     {
         displacement_X -= movementSpeed * deltaTime;
     }
-    
+
     // Move in the Z axis
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
     {
