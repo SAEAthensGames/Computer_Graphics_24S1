@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include "Shader.h"
+
 //using namespace std;
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -11,7 +13,18 @@ void processInput(GLFWwindow* window);
 // settings
 unsigned int SCR_WIDTH = 1280;
 unsigned int SCR_HEIGHT = 1024;
+
+// time settings
+float deltaTime = 0.0f;
+float lastFrameTime = 0.0f;
 // --------
+
+// handling input
+float displacement_X = 0.0f;
+float displacement_Y = 0.0f;
+float displacement_Z = 0.0f;
+float movementSpeed = 1.0f;
+// --------------
 
 int main()
 {
@@ -43,9 +56,52 @@ int main()
     }
     // -----------------------------------
 
+    // Shader loading and building
+    Shader myFirstShader("Shaders/vertexShader.vs", "Shaders/fragmentShader.fs");
+
+    // Geometry definition
+    float vertices[] = {
+        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, //left corner
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, //right corner
+         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f //top corner
+    };
+
+    unsigned int VBO, VAO;
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Vertex attribute for POSITION
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // -----------------------------
+
+    // Vertex attribute for COLOR
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    // --------------------------
+
+    // Unbinding VAO and VBO. This is not mandatory, but it will make the pipeline clearer.
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    // ----------------------
+
+    // -------------------
+
     // MAIN RENDERING LOOP
     while (!glfwWindowShouldClose(window))
     {
+        // DeltaTime calculation
+        float currentFrameTime = glfwGetTime();
+        deltaTime = currentFrameTime - lastFrameTime;
+        lastFrameTime = currentFrameTime;
+        // ---------------------
+
         // handle user input
         processInput(window);
         // -----------------
@@ -57,7 +113,16 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         // -------------------------
         
-        //TODO MORE RENDERING
+        // enable shader and update uniform variables
+        myFirstShader.use();
+        myFirstShader.setVec3("displacement", displacement_X, displacement_Y, displacement_Z);
+        // ------------------------------------------
+
+        // RENDERING
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        // ---------
+
         // ------------
 
         // glfw: double buffering and polling IO events (keyboard, mouse, etc.)
@@ -81,6 +146,35 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        displacement_Y += movementSpeed * deltaTime;
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        displacement_Y -= movementSpeed * deltaTime;
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        displacement_X += movementSpeed * deltaTime;
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        displacement_X -= movementSpeed * deltaTime;
+    }
+    
+    // Move in the Z axis
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+    {
+        displacement_Z -= movementSpeed * deltaTime;
+        std::cout << displacement_Z << std::endl;
+    }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+    {
+        displacement_Z += movementSpeed * deltaTime;
+        std::cout << displacement_Z << std::endl;
     }
 }
 
