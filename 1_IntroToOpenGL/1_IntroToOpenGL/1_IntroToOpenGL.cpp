@@ -68,6 +68,13 @@ int main()
 
     unsigned int VBO, VAO;
 
+    /*int a = 10;
+    int* b = &a;
+
+    int c = *b + 5;
+
+    *aPointer = 10;*/
+
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
